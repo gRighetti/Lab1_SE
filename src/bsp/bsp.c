@@ -144,7 +144,7 @@ void BSP_ADC_Init(void) {
 	ADC_HandleStruct.Init.DataAlign = ADC_DATAALIGN_RIGHT;
 	ADC_HandleStruct.Init.ScanConvMode = DISABLE;
 	ADC_HandleStruct.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
-	ADC_HandleStruct.Init.ContinuousConvMode = ENABLE;
+	ADC_HandleStruct.Init.ContinuousConvMode = DISABLE;
 	ADC_HandleStruct.Init.NbrOfConversion = 1;
 	ADC_HandleStruct.Init.DiscontinuousConvMode = DISABLE;
 	ADC_HandleStruct.Init.ExternalTrigConv = ADC_SOFTWARE_START;
@@ -173,6 +173,7 @@ void BSP_ADC_Init(void) {
 }
 
 uint8_t BSP_GetBrightness(void) {
+	HAL_ADC_Start(&ADC_HandleStruct);
 	return (uint8_t) (HAL_ADC_GetValue(&ADC_HandleStruct) * 100 / 4095);
 }
 
