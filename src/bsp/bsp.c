@@ -12,10 +12,14 @@ extern void APP_1ms(void);
 
 TIM_HandleTypeDef TIM2_Handle;
 TIM_HandleTypeDef TIM4_Handle;
+TIM_HandleTypeDef TIM3_Handle;
 ADC_HandleTypeDef ADC_HandleStruct;
 
 uint32_t* const leds_pwm[] = { &TIM4->CCR1, &TIM4->CCR3, &TIM4->CCR2,
 		&TIM4->CCR4 };
+
+uint32_t* const RGB_pwm[] = { &TIM3->CCR4, &TIM3->CCR3,&TIM3->CCR1 };
+
 
 void BSP_Init(void) {
 	RCC_OscInitTypeDef RCC_OscInitStruct;
@@ -56,6 +60,17 @@ void BSP_Init(void) {
 	GPIO_Init.Pin = GPIO_PIN_12 | GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15;
 	HAL_GPIO_Init(LEDS_PORT, &GPIO_Init);
 
+	//Inicializacion de los pines del led RGB
+	__GPIOB_CLK_ENABLE()
+	;
+	GPIO_Init.Mode = GPIO_MODE_AF_PP;
+	GPIO_Init.Pull = GPIO_NOPULL;
+	GPIO_Init.Speed = GPIO_SPEED_FAST;
+	GPIO_Init.Alternate = GPIO_AF2_TIM3;
+	GPIO_Init.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_4;
+	HAL_GPIO_Init(RGB_PORT, &GPIO_Init);
+
+
 	__TIM2_CLK_ENABLE()
 	;
 
@@ -80,11 +95,38 @@ void BSP_Init(void) {
 	GPIO_Init.Pin = GPIO_PIN_0;
 	HAL_GPIO_Init(GPIOA, &GPIO_Init);
 
-	__TIM3_CLK_ENABLE()
-	;
 
 	TIM_MasterConfigTypeDef TIM_MasterConfig;
 	TIM_OC_InitTypeDef TIM_OC_Init;
+
+	__TIM3_CLK_ENABLE()
+	;
+		TIM3_Handle.Instance = TIM3;
+		TIM3_Handle.Init.Prescaler = 84 - 1;
+		;
+		TIM3_Handle.Init.CounterMode = TIM_COUNTERMODE_UP;
+		TIM3_Handle.Init.Period = 1500;
+		TIM3_Handle.Init.ClockDivision = TIM_CLOCKDIVISION_DIV2;
+		HAL_TIM_PWM_Init(&TIM3_Handle);
+
+		TIM_MasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+		TIM_MasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+		HAL_TIMEx_MasterConfigSynchronization(&TIM3_Handle, &TIM_MasterConfig);
+
+		TIM_OC_Init.OCMode = TIM_OCMODE_PWM2;
+		TIM_OC_Init.Pulse = 0;
+		TIM_OC_Init.OCPolarity = TIM_OCPOLARITY_HIGH;
+		TIM_OC_Init.OCFastMode = TIM_OCFAST_ENABLE;
+
+		HAL_TIM_PWM_ConfigChannel(&TIM3_Handle, &TIM_OC_Init, TIM_CHANNEL_1);
+		HAL_TIM_PWM_ConfigChannel(&TIM3_Handle, &TIM_OC_Init, TIM_CHANNEL_3);
+		HAL_TIM_PWM_ConfigChannel(&TIM3_Handle, &TIM_OC_Init, TIM_CHANNEL_4);
+
+		HAL_TIM_PWM_Start(&TIM3_Handle, TIM_CHANNEL_1);
+		HAL_TIM_PWM_Start(&TIM3_Handle, TIM_CHANNEL_3);
+		HAL_TIM_PWM_Start(&TIM3_Handle, TIM_CHANNEL_4);
+
+
 
 	__TIM4_CLK_ENABLE()
 	;
@@ -117,6 +159,9 @@ void BSP_Init(void) {
 	HAL_TIM_PWM_Start(&TIM4_Handle, TIM_CHANNEL_4);
 
 	BSP_ADC_Init();
+
+
+
 }
 
 uint32_t Get_SW_State(void) {
@@ -126,6 +171,12 @@ uint32_t Get_SW_State(void) {
 void led_setBright(uint8_t led, uint8_t value) {
 	*leds_pwm[led] = 1000 * value / 100;
 }
+
+
+void rgb_setBright(uint8_t rgb, uint8_t value) {
+	*RGB_pwm[rgb] = 1000 * value / 100;
+}
+
 
 void BSP_ADC_Init(void) {
 
@@ -176,6 +227,12 @@ uint8_t BSP_GetBrightness(void) {
 	HAL_ADC_Start(&ADC_HandleStruct);
 	return (uint8_t) (HAL_ADC_GetValue(&ADC_HandleStruct) * 100 / 4095);
 }
+
+uint16_t Value_Potenciometro(void) {
+	HAL_ADC_Start(&ADC_HandleStruct);
+	return (uint16_t)HAL_ADC_GetValue(&ADC_HandleStruct)*1000/4095;
+}
+
 
 void TIM2_IRQHandler(void) {
 

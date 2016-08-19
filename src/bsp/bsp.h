@@ -19,6 +19,14 @@ enum{
 	LED_AZUL
 }leds;
 
+#define RGB_PORT GPIOB
+enum{
+	RGB_VERDE = 0,
+	RGB_ROJO,
+	RGB_AZUL
+}RGB;
+
+
 
 #define EXP_BOARD_POT_PIN				   GPIO_PIN_2
 #define EXP_BOARD_POT_PORT                   GPIOC
@@ -36,5 +44,8 @@ void led_setBright(uint8_t led, uint8_t value);
 
 void BSP_ADC_Init(void);
 uint8_t BSP_GetBrightness(void);
+uint16_t Value_Potenciometro(void);
+
+void rgb_setBright(uint8_t led, uint8_t value);
 
 #endif /* BSP_BSP_H_ */
