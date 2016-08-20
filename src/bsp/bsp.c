@@ -230,7 +230,7 @@ uint8_t BSP_GetBrightness(void) {
 
 uint16_t Value_Potenciometro(void) {
 	HAL_ADC_Start(&ADC_HandleStruct);
-	return (uint16_t)HAL_ADC_GetValue(&ADC_HandleStruct)*1000/4095;
+	return (uint16_t)HAL_ADC_GetValue(&ADC_HandleStruct);
 }
 
 
