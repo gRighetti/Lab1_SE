@@ -24,7 +24,7 @@ int main(void) {
 		}
 		if (Value_Pote > 491 && Value_Pote <= 1065) {
 
-			rgb_setBright(RGB_ROJO, 100 - (100/574 * (Value_Pote-492)));
+			rgb_setBright(RGB_ROJO, 100 - (100/573 * (Value_Pote-492)));
 			rgb_setBright(RGB_AZUL, 0);
 			rgb_setBright(RGB_VERDE, 100);
 		}
